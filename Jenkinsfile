@@ -2,22 +2,25 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'coffee-shop'
-        DOCKER_TAG = 'latest'
+        GIT_CREDENTIALS = 'f737ca6a-0539-43c5-a045-a81ca0076902'  // Replace with your Jenkins credentials ID
+        GIT_REPO = 'https://github.com/Vannamathi12/Devopsproject.git'
+        GIT_BRANCH = 'main'  // Change to 'master' if your repo uses master
+        DOCKER_IMAGE = 'vannamathi124/devopsproject'  // Replace with your Docker Hub repo
     }
 
     stages {
         stage('Checkout Code') {
-    steps {
-        git credentialsId: 'your-credential-id', url: 'https://github.com/Vannamathi12/Devopsproject.git'
-    }
-}
-
+            steps {
+                script {
+                    git credentialsId: GIT_CREDENTIALS, url: GIT_REPO, branch: GIT_BRANCH
+                }
+            }
+        }
 
         stage('Build') {
             steps {
                 script {
-                    sh './gradlew clean build' // Change to 'mvn clean package' if using Maven
+                    sh 'mvn clean package'  // Replace with the correct build command for your project
                 }
             }
         }
@@ -25,7 +28,7 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    sh './gradlew test' // Change if using a different test framework
+                    sh 'mvn test'  // Replace with the correct test command
                 }
             }
         }
@@ -33,16 +36,17 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                    sh "docker build -t ${DOCKER_IMAGE}:latest ."
                 }
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
-                    sh "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} your-docker-hub-username/${DOCKER_IMAGE}:${DOCKER_TAG}"
-                    sh "docker push your-docker-hub-username/${DOCKER_IMAGE}:${DOCKER_TAG}"
+                script {
+                    withDockerRegistry([credentialsId: 'your-dockerhub-credential-id', url: '']) {
+                        sh "docker push ${DOCKER_IMAGE}:latest"
+                    }
                 }
             }
         }
@@ -50,7 +54,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    sh "docker run -d -p 8080:8080 ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    sh 'echo Deploying application...'  
+                    // Add deployment commands (e.g., Kubernetes, SSH, etc.)
                 }
             }
         }

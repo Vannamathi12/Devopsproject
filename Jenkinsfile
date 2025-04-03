@@ -8,9 +8,11 @@ pipeline {
 
     stages {
         stage('Checkout Code') {
-            steps {
-                git 'https://github.com/your-repo/coffee-shop.git'
-            }
+    steps {
+        git credentialsId: 'your-credential-id', url: 'https://github.com/Vannamathi12/Devopsproject.git'
+    }
+}
+
         }
 
         stage('Build') {
